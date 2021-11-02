@@ -11,11 +11,12 @@ void main() => runApp(MaterialApp(
 
 class HomePage extends StatefulWidget {
   @override
-  _HomePageState createState() => new _HomePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  dynamic mapResponse = null;
+  bool isLoading = true;
+  dynamic mapResponse;
   List listOfFacts = [];
 
   Future fetchData() async {
@@ -26,6 +27,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         mapResponse = json.decode(response.body);
         listOfFacts = mapResponse['facts'];
+        isLoading = false;
       });
     }
   }
@@ -40,46 +42,57 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('API'),
+        title: const Text('API'),
         backgroundColor: Colors.blue[900],
       ),
-      body: mapResponse == null
-          ? Container()
+      body: isLoading
+          ? const Center(
+              child: SizedBox(
+                height: 24.0,
+                width: 24.0,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(Colors.blue),
+                ),
+              ),
+            )
           : SingleChildScrollView(
               child: Column(
                 children: <Widget>[
                   Text(
                     mapResponse['category'].toString(),
-                    style: TextStyle(fontSize: 30),
+                    style: const TextStyle(fontSize: 30),
                   ),
                   ListView.builder(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       return Container(
-                        margin: EdgeInsets.all(10),
+                        margin: const EdgeInsets.all(10),
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            ContentScreen.network(
-                               listOfFacts[index]['image_url']),
+                            SizedBox(
+                              height: 320.0,
+                              child: ContentScreen(
+                              src: listOfFacts[index]['image_url'],
+                              looping: false,
+                            )),
                             Text(
                               listOfFacts[index]['title'].toString(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
                               listOfFacts[index]['description'].toString(),
-                              style: TextStyle(
-                                fontSize: 18,
-                              ),
+                              style: const TextStyle(fontSize: 18),
                             )
                           ],
                         ),
                       );
                     },
-                    itemCount: listOfFacts == null ? 0 : listOfFacts.length,
+                    itemCount: listOfFacts.isEmpty ? 0 : listOfFacts.length,
                   )
                 ],
               ),

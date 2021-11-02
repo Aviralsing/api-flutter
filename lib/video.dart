@@ -4,45 +4,44 @@ import 'package:video_player/video_player.dart';
 
 class ContentScreen extends StatefulWidget {
   // This will contain the URL/asset path which we want to play
-  final VideoPlayerController videoPlayerController;
+  final String src;
   final bool looping;
 
-  ContentScreen({
-    required this.videoPlayerController,
+  const ContentScreen({
+    Key? key,
+    required this.src,
     required this.looping,
-    Key? key, required String src,
   }) : super(key: key);
 
   @override
   _ContentScreenState createState() => _ContentScreenState();
-
-  static network(listOfFact) {}
 }
 
 class _ContentScreenState extends State<ContentScreen> {
+  late VideoPlayerController videoPlayerController;
   late ChewieController _chewieController;
 
   @override
   void initState() {
     super.initState();
     // Wrapper on top of the videoPlayerController
+    videoPlayerController = VideoPlayerController.network(widget.src);
     _chewieController = ChewieController(
-      videoPlayerController: widget.videoPlayerController,
+      videoPlayerController: videoPlayerController,
+      autoPlay: true,
       aspectRatio: 16 / 9,
-      // Prepare the video to be played and display the first frame
       autoInitialize: true,
       looping: widget.looping,
-      // Errors can occur for example when trying to play a video
-      // from a non-existent URL
       errorBuilder: (context, errorMessage) {
         return Center(
           child: Text(
             errorMessage,
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
         );
       },
     );
+    videoPlayerController.play();
   }
 
   @override
@@ -59,7 +58,7 @@ class _ContentScreenState extends State<ContentScreen> {
   void dispose() {
     super.dispose();
     // IMPORTANT to dispose of all the used resources
-    widget.videoPlayerController.dispose();
+    videoPlayerController.dispose();
     _chewieController.dispose();
   }
 }
